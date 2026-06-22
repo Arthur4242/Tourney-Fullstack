@@ -1,0 +1,16 @@
+teste.py
+
+# Ambiente virtual
+venv/
+.venv/
+
+# Cache do Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Arquivos de configuração local
+.env
+
+# Banco SQLite
+*.db
