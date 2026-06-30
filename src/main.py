@@ -4,7 +4,10 @@ from models.time import *
 from models.torneio import *
 from models.usuario_time import *
 from models.torneio_time import *
+from models.torneio_usuario import *
 from enums.tipo_torneio import *
+from repositories.usuario_repository import UsuarioRepository
+
 from models.base import Base
 from sqlalchemy import select
 
@@ -13,60 +16,15 @@ from sqlalchemy import select
 Base.metadata.create_all(engine)
 
 session = SessionLocal()
+userRepository = UsuarioRepository(session)
+
+userRepository.adicionarUsuario("Cleiton", "teste@email.com")
+userRepository.adicionarUsuario("Arthur")
+
+usuarios: list[Usuario] = userRepository.listar()
+for u in usuarios:
+    print(u.nome)
+    print(u.email)
 
 
-arthur = Usuario(nome="Arthur")
-flamengo = Time(nome="Flamengo")
-bostaclube = Time(nome="Bostaclube")
-
-participacao = UsuarioTime(
-    usuario=arthur,
-    time=flamengo
-)
-
-participacao2 = UsuarioTime(
-    usuario=arthur,
-    time=bostaclube
-)
-
-session.add(participacao)
-session.add(arthur)
-session.commit()
-
-
-timao = session.scalars(
-    select(Time).where(Time.id == 2)
-).one()
-
-
-torneio = Torneio(nome ="hentai da silva", tipo = TipoTorneio.EQUIPE)
-
-time_participacao = TorneioTime(
-    time=timao,
-    torneio=torneio
-
-)
-
-# session.add(torneio)
-session.add(time_participacao)
-session.commit()
-
-campeonatos = session.scalars(
-    select(Torneio)
-).all()
-
-for campeonato in campeonatos:
-    print(campeonato.nome)
-    print()
-    for p in campeonato.times_participantes:
-        print(p.time.nome)
-    print()
-
-# for time in times:
-#     print(time.nome)
-#     print(time.id)
-#     print("Membros")
-#     for integrante in time.integrantes:
-#         print(integrante.nome)
-    
-
+session.close()
