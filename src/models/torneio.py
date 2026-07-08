@@ -1,5 +1,5 @@
 from models.base import Base
-from enums.tipo_torneio import *
+from enums.enums_torneio import *
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import Enum as SQLEnum
 
@@ -9,8 +9,13 @@ class Torneio(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     nome: Mapped[str]
 
+
     tipo: Mapped[TipoTorneio] = mapped_column(
         SQLEnum(TipoTorneio)
+    )
+
+    estado: Mapped[EstadoTorneio] = mapped_column(
+        SQLEnum(EstadoTorneio)
     )
 
     times_participantes: Mapped[list["TorneioTime"]] = relationship(
@@ -23,4 +28,8 @@ class Torneio(Base):
         cascade="all, delete-orphan"
     )
     
+    fases_torneio: Mapped[list["Fase"]] = relationship(
+        back_populates='torneio',
+        cascade="all, delete-orphan"
+    )
     

@@ -1,9 +1,10 @@
 from models.torneio import Torneio
 from models.usuario import Usuario
 from models.torneio_usuario import TorneioUsuario
+from models.fase import Fase
 from sqlalchemy.orm import Session
-from enums.tipo_torneio import *
-
+from enums.enums_torneio import *
+from sqlalchemy import select
 
 class TorneioRepository:
 
@@ -13,18 +14,13 @@ class TorneioRepository:
     def listar(self):
         return self.session.query(Torneio).all()
     
-    def buscarty_torneio_por_id(self, usuario_id: int) -> Torneio | None:
+    def buscart_torneio_por_id(self, usuario_id: int) -> Torneio | None:
         return self.session.get(Torneio, usuario_id)
     
     def busar_usuario_por_id(self, usuario_id: int) -> Usuario | None:
         return self.session.get(Usuario, usuario_id)
     
-    def adicionarTorneio(self, nome: str, tipo: TipoTorneio | None = None) ->Torneio:
-        torneio = Torneio(
-            nome = nome,
-            tipo = tipo
-        )
-
+    def adicionarTorneio(self, torneio: Torneio) -> Torneio:
         self.session.add(torneio)
         self.session.commit()
         self.session.refresh(torneio)
@@ -32,12 +28,7 @@ class TorneioRepository:
         return torneio
     
     
-    def deletartorneio(self, torneio_id) -> None:
-        torneio = self.buscar_torneio_por_id(torneio_id)
-
-        if torneio is None:
-            return False
-        
+    def deletartorneio(self, torneio) -> None:
         self.session.delete(torneio)
         self.session.commit()
         return True
@@ -48,29 +39,46 @@ class TorneioRepository:
         return torneio
     
 
-    def adicionarParticiapacaoUsuario(self, torneio: Torneio, usuario: Usuario):
-        
-        participacao = TorneioUsuario(
-            usuario_id = usuario.id,
-            torneio_id = torneio.id,
-            usuario = usuario,
-            torneio = torneio
-        )
-         
+    def adicionarParticiapacaoUsuario(self, participacao: TorneioUsuario) -> TorneioUsuario:         
         self.session.add(participacao)
         self.session.commit()
         self.session.refresh(participacao)
 
         return participacao
     
-    def removerParticipacaoUsuario(self, torneio: Torneio, usuario: Usuario):
+    def listarParticipantes(self, torneio_id: int) -> list[TorneioUsuario]:
+        stmt = (
+            select(Usuario)
+            .join(TorneioUsuario)
+            .where(TorneioUsuario.torneio_id == torneio_id)
+            )
 
-        participacao = TorneioUsuario(
-            usuario_id = usuario.id,
-            torneio_id = torneio.id,
-            usuario = usuario,
-            torneio = torneio
+        return self.session.scalars(stmt).all()
+    
+    def procurarParticipacao(self, usuario: Usuario, torneio: Torneio):
+        stmt = (
+            select(TorneioUsuario)
+            .where(
+                TorneioUsuario.torneio_id == torneio.id,
+                TorneioUsuario.usuario_id == usuario.id)
         )
+        return self.session.scalars(stmt).first()
 
+    def removerParticipacaoUsuario(self, participacao):
         self.session.delete(participacao)
         self.session.commit()
+
+    def adicionarFase(self, fase: Fase):
+        self.session.add(fase)
+        self.session.commit()
+        self.session.refresh(fase)
+
+        return fase
+    
+    def listarFases(self, torneio: Torneio):
+        stmt = (
+            select(Fase)
+            .where(Fase.torneio_id == torneio.id)
+            )
+
+        return self.session.scalars(stmt).all()

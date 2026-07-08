@@ -1,5 +1,6 @@
 from models.usuario import Usuario
 from sqlalchemy.orm import Session
+from sqlalchemy import select
 
 class UsuarioRepository:
 
@@ -12,11 +13,12 @@ class UsuarioRepository:
     def busar_usuario_por_id(self, usuario_id: int) -> Usuario | None:
         return self.session.get(Usuario, usuario_id)
     
-    def adicionarUsuario(self, nome: str, email: str | None = None) -> Usuario:
-        usuario = Usuario(
-            nome = nome,
-            email = email
-        )
+    def busar_usuario_por_email(self, usuario_email: str) -> Usuario | None:
+        stmt = select(Usuario).where(Usuario.email == usuario_email)
+        return self.session.scalar(stmt)
+    
+    
+    def adicionar_usuario(self, usuario) -> Usuario:
 
         self.session.add(usuario)
         self.session.commit()
@@ -25,11 +27,7 @@ class UsuarioRepository:
         return usuario
     
     
-    def deletarUsuario(self, usuario_id) -> None:
-        usuario = self.busar_usuario_por_id(usuario_id)
-
-        if usuario is None:
-            return False
+    def deletar_usuario(self, usuario: Usuario) -> None:
         
         self.session.delete(usuario)
         self.session.commit()
