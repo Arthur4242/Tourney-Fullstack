@@ -12,9 +12,33 @@ class Partida(Base):
     fase_id: Mapped[int] = mapped_column(
         ForeignKey("fases.id")
     )
-    
-    fase: Mapped['Fase'] = relationship(
-        back_populates='partidas'
+
+    user1_id: Mapped[int] = mapped_column(
+        ForeignKey("usuarios.id")
     )
 
+    user2_id: Mapped[int] = mapped_column(
+        ForeignKey("usuarios.id")
+    )
+
+    vencedor_id: Mapped[int | None] = mapped_column(
+        ForeignKey("usuarios.id"),
+        nullable=True
+    )
+
+    fase: Mapped["Fase"] = relationship(
+        back_populates="partidas"
+    )
+
+    jogador1: Mapped["Usuario"] = relationship(
+        foreign_keys=[user1_id]
+    )
+
+    jogador2: Mapped["Usuario"] = relationship(
+        foreign_keys=[user2_id]
+    )
+
+    vencedor: Mapped["Usuario | None"] = relationship(
+        foreign_keys=[vencedor_id]
+    )
     

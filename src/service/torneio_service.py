@@ -10,17 +10,17 @@ class TorneioService:
     def __init__(self, torneio_repository: TorneioRepository):
         self.torneio_repository = torneio_repository
 
-    def cadastrarTorneio(self, nome: str, tipo: TipoTorneio):
+    def cadastrar_torneio(self, nome: str, tipo: TipoTorneio):
         torneio = Torneio(
             nome=nome,
             tipo=tipo
         )
-        return self.torneio_repository.adicionarTorneio(torneio)
+        return self.torneio_repository.adicionar_torneio(torneio)
     
-    def deletarTorneio(self, torneio: Torneio):
-        self.deletarTorneio(torneio)
+    def deletar_torneio(self, torneio: Torneio):
+        self.torneio_repository.deletar_torneio(torneio)
 
-    def alterarEstado(self, torneio: Torneio, estado: EstadoTorneio):
+    def alterar_estado(self, torneio: Torneio, estado: EstadoTorneio):
         if torneio.estado == estado:
             raise ValueError(
                 f"O torneio já se encontra no estado {estado.value}."
@@ -32,7 +32,7 @@ class TorneioService:
         
 
 
-    def adicionarUsuarioTorneio(self, usuario: Usuario, torneio: Torneio):
+    def adicionar_usuario_torneio(self, usuario: Usuario, torneio: Torneio):
         if torneio.tipo != TipoTorneio.INDIVIDUAL:
             raise ValueError("Não é possível cadastrar um indivídio nesse torneio")
         
@@ -48,41 +48,43 @@ class TorneioService:
             torneio = torneio
         )
 
-        self.torneio_repository.adicionarParticiapacaoUsuario(participacao)
+        self.torneio_repository.adicionar_particiapacao_usuario(participacao)
 
-    def removerUsuarioTorneio(self, usuario: Usuario, torneio: Torneio):
-        p: TorneioUsuario | None = self.torneio_repository.procurarParticipacao(usuario, torneio)
+    def remover_usuario_torneio(self, usuario: Usuario, torneio: Torneio):
+        p: TorneioUsuario | None = self.torneio_repository.procurar_participacao(usuario, torneio)
         
         if p is None:
             raise ValueError("O usuário não está participando do torneio")
         
-        self.torneio_repository.removerParticipacaoUsuario(p)
+        self.torneio_repository.remover_participacao_usuario(p)
 
 
     # Alterar etapa do torneio
 
-    def abrirInscricoes(self, torneio: Torneio):
+    def abrir_inscricoes(self, torneio: Torneio):
         if torneio.estado != EstadoTorneio.CRIADO:
             raise ValueError("Não é possível abrir as incrições.")
         
-        self.alterarEstado(torneio, EstadoTorneio.INSCRICOES_ABERTAS)
+        self.alterar_estado(torneio, EstadoTorneio.INSCRICOES_ABERTAS)
 
-    def encerrarInscricoes(self, torneio: Torneio):
+    def encerrar_inscricoes(self, torneio: Torneio):
         if torneio.estado != EstadoTorneio.INSCRICOES_ABERTAS:
             raise ValueError("As inscrições não foram abertas para encerrar.")
         
-        self.alterarEstado(torneio, EstadoTorneio.INSCRICOES_ENCERRADAS)
+        self.alterar_estado(torneio, EstadoTorneio.INSCRICOES_ENCERRADAS)
 
-    def inicarTorneio(self, torneio: Torneio):
+    def inicar_torneio(self, torneio: Torneio):
         if torneio.estado != EstadoTorneio.INSCRICOES_ENCERRADAS:
             raise ValueError("Não é possível iniciar o torneio.")
 
-        self.alterarEstado(torneio, EstadoTorneio.EM_ANDAMENTO)
+        self.alterar_estado(torneio, EstadoTorneio.EM_ANDAMENTO)
 
-    def finalizarTorneio(self, torneio: Torneio):
+    def finalizar_torneio(self, torneio: Torneio):
         if torneio.estado != EstadoTorneio.EM_ANDAMENTO:
             raise ValueError("O torneio não está em andamento para finalizar.")
-        self.alterarEstado(torneio, EstadoTorneio.FINALIZADO)
+        self.alterar_estado(torneio, EstadoTorneio.FINALIZADO)
 
-    def cancelarTorneio(self, torneio: Torneio):
-        self.alterarEstado(torneio, EstadoTorneio.CANCELADO)
+    def cancelar_torneio(self, torneio: Torneio):
+        self.alterar_estado(torneio, EstadoTorneio.CANCELADO)
+
+    

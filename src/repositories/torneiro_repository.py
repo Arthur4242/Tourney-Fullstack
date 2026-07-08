@@ -20,7 +20,7 @@ class TorneioRepository:
     def busar_usuario_por_id(self, usuario_id: int) -> Usuario | None:
         return self.session.get(Usuario, usuario_id)
     
-    def adicionarTorneio(self, torneio: Torneio) -> Torneio:
+    def adicionar_torneio(self, torneio: Torneio) -> Torneio:
         self.session.add(torneio)
         self.session.commit()
         self.session.refresh(torneio)
@@ -28,7 +28,7 @@ class TorneioRepository:
         return torneio
     
     
-    def deletartorneio(self, torneio) -> None:
+    def deletar_torneio(self, torneio) -> None:
         self.session.delete(torneio)
         self.session.commit()
         return True
@@ -39,14 +39,14 @@ class TorneioRepository:
         return torneio
     
 
-    def adicionarParticiapacaoUsuario(self, participacao: TorneioUsuario) -> TorneioUsuario:         
+    def adicionar_particiapacao_usuario(self, participacao: TorneioUsuario) -> TorneioUsuario:         
         self.session.add(participacao)
         self.session.commit()
         self.session.refresh(participacao)
 
         return participacao
     
-    def listarParticipantes(self, torneio_id: int) -> list[TorneioUsuario]:
+    def listar_participantes(self, torneio_id: int) -> list[TorneioUsuario]:
         stmt = (
             select(Usuario)
             .join(TorneioUsuario)
@@ -55,7 +55,7 @@ class TorneioRepository:
 
         return self.session.scalars(stmt).all()
     
-    def procurarParticipacao(self, usuario: Usuario, torneio: Torneio):
+    def procurar_participacao(self, usuario: Usuario, torneio: Torneio):
         stmt = (
             select(TorneioUsuario)
             .where(
@@ -64,18 +64,18 @@ class TorneioRepository:
         )
         return self.session.scalars(stmt).first()
 
-    def removerParticipacaoUsuario(self, participacao):
+    def remover_participacao_usuario(self, participacao):
         self.session.delete(participacao)
         self.session.commit()
 
-    def adicionarFase(self, fase: Fase):
+    def adicionar_fase(self, fase: Fase):
         self.session.add(fase)
         self.session.commit()
         self.session.refresh(fase)
 
         return fase
     
-    def listarFases(self, torneio: Torneio):
+    def listar_fases(self, torneio: Torneio) ->  list[Fase]:
         stmt = (
             select(Fase)
             .where(Fase.torneio_id == torneio.id)
