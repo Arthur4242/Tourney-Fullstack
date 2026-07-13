@@ -28,3 +28,4 @@ class Rodada(Base):
         back_populates='rodada',
         cascade="all, delete-orphan"
     )
+    

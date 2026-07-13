@@ -43,7 +43,7 @@ class Partida(Base):
         foreign_keys=[user1_id]
     )
 
-    jogador2: Mapped["Usuario"] = relationship(
+    jogador2: Mapped["Usuario | None"] = relationship(
         foreign_keys=[user2_id]
     )
 

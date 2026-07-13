@@ -2,15 +2,22 @@ from models.usuario import Usuario
 from models.torneio import Torneio
 from models.torneio_usuario import TorneioUsuario
 from models.fase_mata_mata import FaseMataMata
+from models.rodada import Rodada
+from models.partida import Partida
+from models.fase import Fase
 
 from repositories.torneiro_repository import TorneioRepository
 from enums.enums_torneio import EstadoTorneio, TipoTorneio
 from enums.enums_fase import TipoFase
 
+import random
+
 class TorneioService:
 
     def __init__(self, torneio_repository: TorneioRepository):
         self.torneio_repository = torneio_repository
+
+    # CRUD
 
     def cadastrar_torneio(self, nome: str, tipo: TipoTorneio):
         torneio = Torneio(
@@ -76,22 +83,6 @@ class TorneioService:
         
         self.alterar_estado(torneio, EstadoTorneio.INSCRICOES_ENCERRADAS)
 
-    def iniciar_chaveamento(self, torneio: Torneio):
-                
-        if torneio.fases_torneio.len() < 1:
-            raise ValueError("As fases do torneio ainda não foram preenchidas")
-
-        for fase in torneio.fases_torneio:
-            
-            match fase.tipo:
-                
-                case TipoFase.MATA_MATA:
-                    # Lógica de chaveamento para mata-mata
-                    pass
-
-                case TipoFase.SWISS:
-                    # lógica de chaveamento para swiss
-                    pass
     
     def adicionar_fase_mata_mata(self, torneio: Torneio, melhor_de: int) -> Torneio:
 
@@ -127,3 +118,92 @@ class TorneioService:
 
     def listar_torneios(self) -> list[Torneio]:
         return self.torneio_repository.listar()
+    
+    def finalizar_partida(self, partida: Partida, vencedor: Usuario):
+
+        if vencedor is not partida.jogador1 or partida.jogador2:
+            print("Este usuário não faz parte desta partida")
+
+        partida.vencedor = vencedor
+
+    def verificar_fim_da_rodada(self, rodada: Rodada) -> bool:
+        return all(partida.vencedor is not None for partida in rodada.partidas)
+    
+    # Lógica de Torneio
+
+    def iniciar_chaveamento(self, torneio: Torneio):
+                
+        if torneio.fases_torneio.len() == 0:
+            raise ValueError("As fases do torneio ainda não foram preenchidas")
+
+        for fase in torneio.fases_torneio:
+            
+            match fase.tipo:
+                
+                case TipoFase.MATA_MATA:
+                    
+                    participantes = list(torneio.usuarios_participantes)
+                    random.shuffle(participantes)
+
+                    rodada = Rodada()
+
+                    while len(participantes) >= 2:
+                        jogador1 = participantes.pop()
+                        jogador2 = participantes.pop()
+
+                        partida = Partida(
+                            jogador1 = jogador1,
+                            jogador2 = jogador2
+                        )
+                        rodada.partidas.append(partida)
+
+                    # Caso sobrar um participante
+
+                    if participantes:
+                        jogador = participantes.pop()
+
+                        partida = Partida(
+                            jogador1=jogador,
+                            jogador2=None,
+                            vencedor=jogador
+                        )
+
+                        rodada.partidas.append(partida)
+
+                    fase.append(rodada)
+
+                case TipoFase.SWISS:
+                    # lógica de chaveamento para swiss
+                    pass
+        
+        # Salvar após chaveamento inicial
+        self.torneio_repository.salvar(torneio)
+        return torneio
+
+    # Lógica de mata_mata
+
+    def criar_proxima_rodada_mata_mata(self, rodada_atual: Rodada):
+        
+        vencedores = [
+            partida.vencedor
+            for partida in rodada_atual.partidas
+        ]
+
+        # Varificar se há apenas um vencedor e o torneio terminou
+        if len(vencedores) == 1:
+            # Corrigir futuramente
+            # rodada_atual.fase.torneio. = vencedores[0]
+            # torneio.estado = EstadoTorneio.FINALIZADO
+            return ("O torneio terminou e o campeão é" + vencedores[0].nome)
+
+        nova_rodada = Rodada()
+
+        for i in range(0, len(vencedores), 2):
+            partida = Partida(
+                jogador1 = vencedores[i],
+                jogador2 = vencedores[i + 1]
+            )
+            nova_rodada.partidas.append(partida)
+
+        return nova_rodada
+    
