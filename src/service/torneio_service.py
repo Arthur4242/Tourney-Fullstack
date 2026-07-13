@@ -73,6 +73,10 @@ class TorneioService:
         
         self.alterar_estado(torneio, EstadoTorneio.INSCRICOES_ENCERRADAS)
 
+    def iniciar_chaveamento(self, torneio: Torneio):
+        for fase in torneio.fases_torneio:
+            
+
     def inicar_torneio(self, torneio: Torneio):
         if torneio.estado != EstadoTorneio.INSCRICOES_ENCERRADAS:
             raise ValueError("Não é possível iniciar o torneio.")

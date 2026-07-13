@@ -2,6 +2,13 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import ForeignKey
 from models.base import Base
 
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from models.time import Time
+    from models.usuario import Usuario
+
 class UsuarioTime(Base):
     __tablename__ = "usuario_time"
 

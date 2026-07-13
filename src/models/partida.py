@@ -4,13 +4,20 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import Enum as SQLEnum
 from sqlalchemy import ForeignKey
 
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from models.usuario import Usuario
+    from models.rodada import Rodada
+
 class Partida(Base):
     __tablename__ = "partidas"
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    fase_id: Mapped[int] = mapped_column(
-        ForeignKey("fases.id")
+    rodada_id: Mapped[int] = mapped_column(
+        ForeignKey("rodadas.id")
     )
 
     user1_id: Mapped[int] = mapped_column(
@@ -26,7 +33,7 @@ class Partida(Base):
         nullable=True
     )
 
-    fase: Mapped["Fase"] = relationship(
+    rodada: Mapped["Rodada"] = relationship(
         back_populates="partidas"
     )
 

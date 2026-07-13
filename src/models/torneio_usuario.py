@@ -2,6 +2,13 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import ForeignKey
 from models.base import Base
 
+from __future__ import annotations
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from models.torneio import Torneio
+    from models.usuario import Usuario
+
 class TorneioUsuario(Base):
 
     __tablename__ = "torneio_usuario"
