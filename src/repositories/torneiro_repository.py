@@ -11,7 +11,7 @@ class TorneioRepository:
     def __init__(self, session: Session):
         self.session = session
 
-    def listar(self):
+    def listar(self) -> list[Torneio]:
         return self.session.query(Torneio).all()
     
     def buscart_torneio_por_id(self, usuario_id: int) -> Torneio | None:

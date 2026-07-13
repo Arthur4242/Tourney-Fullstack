@@ -1,7 +1,7 @@
+# from __future__ import annotations
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 from models.base import Base
 
-from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:

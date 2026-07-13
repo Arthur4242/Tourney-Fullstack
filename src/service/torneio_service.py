@@ -1,9 +1,11 @@
 from models.usuario import Usuario
 from models.torneio import Torneio
 from models.torneio_usuario import TorneioUsuario
-from repositories.usuario_repository import UsuarioRepository
+from models.fase_mata_mata import FaseMataMata
+
 from repositories.torneiro_repository import TorneioRepository
 from enums.enums_torneio import EstadoTorneio, TipoTorneio
+from enums.enums_fase import TipoFase
 
 class TorneioService:
 
@@ -13,7 +15,8 @@ class TorneioService:
     def cadastrar_torneio(self, nome: str, tipo: TipoTorneio):
         torneio = Torneio(
             nome=nome,
-            tipo=tipo
+            tipo=tipo,
+            estado=EstadoTorneio.CRIADO
         )
         return self.torneio_repository.adicionar_torneio(torneio)
     
@@ -74,8 +77,39 @@ class TorneioService:
         self.alterar_estado(torneio, EstadoTorneio.INSCRICOES_ENCERRADAS)
 
     def iniciar_chaveamento(self, torneio: Torneio):
+                
+        if torneio.fases_torneio.len() < 1:
+            raise ValueError("As fases do torneio ainda não foram preenchidas")
+
         for fase in torneio.fases_torneio:
             
+            match fase.tipo:
+                
+                case TipoFase.MATA_MATA:
+                    # Lógica de chaveamento para mata-mata
+                    pass
+
+                case TipoFase.SWISS:
+                    # lógica de chaveamento para swiss
+                    pass
+    
+    def adicionar_fase_mata_mata(self, torneio: Torneio, melhor_de: int) -> Torneio:
+
+        if melhor_de <= 0 or melhor_de % 2 == 0:
+            raise ValueError("Melhor de deve ser um número ímpar maior que zero.")
+        
+        fase = FaseMataMata(
+            tipo=TipoFase.MATA_MATA,
+            melhor_de=melhor_de
+        )
+
+        torneio.fases_torneio.append(fase)
+
+        
+        torneio = self.torneio_repository.salvar(torneio)
+
+        return torneio
+
 
     def inicar_torneio(self, torneio: Torneio):
         if torneio.estado != EstadoTorneio.INSCRICOES_ENCERRADAS:
@@ -91,4 +125,5 @@ class TorneioService:
     def cancelar_torneio(self, torneio: Torneio):
         self.alterar_estado(torneio, EstadoTorneio.CANCELADO)
 
-    
+    def listar_torneios(self) -> list[Torneio]:
+        return self.torneio_repository.listar()
