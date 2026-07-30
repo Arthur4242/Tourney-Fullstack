@@ -1,16 +1,16 @@
 # from __future__ import annotations
 
-from models.base import Base
-from enums.enums_torneio import *
+from backend.src.models.base import Base
+from backend.src.enums.enums_torneio import *
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import Enum as SQLEnum
 
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from models.fase import Fase
-    from models.torneio_time import TorneioTime
-    from models.torneio_usuario import TorneioUsuario
+    from backend.src.models.fase import Fase
+    from backend.src.models.torneio_time import TorneioTime
+    from backend.src.models.torneio_usuario import TorneioUsuario
 
 
 class Torneio(Base):

@@ -1,9 +1,11 @@
-from models.torneio import Torneio
-from models.usuario import Usuario
-from models.torneio_usuario import TorneioUsuario
-from models.fase import Fase
+from backend.src.models.torneio import Torneio
+from backend.src.models.usuario import Usuario
+from backend.src.models.torneio_usuario import TorneioUsuario
+from backend.src.models.fase import Fase
+from backend.src.models.rodada import Rodada
+from backend.src.models.partida import Partida
 from sqlalchemy.orm import Session
-from enums.enums_torneio import *
+from backend.src.enums.enums_fase import TipoFase
 from sqlalchemy import select
 
 class TorneioRepository:
@@ -14,8 +16,15 @@ class TorneioRepository:
     def listar(self) -> list[Torneio]:
         return self.session.query(Torneio).all()
     
-    def buscart_torneio_por_id(self, usuario_id: int) -> Torneio | None:
-        return self.session.get(Torneio, usuario_id)
+    def buscart_torneio_por_id(self, torneio_id: int) -> Torneio | None:
+        return self.session.get(Torneio, torneio_id)
+    
+    def buscar_torneio_por_nome(self, nome_torneio: str) -> Torneio | None:
+        stmt = (
+            select(Torneio)
+            .where(Torneio.nome == nome_torneio)
+        )
+        return self.session.scalars(stmt).first()
     
     def busar_usuario_por_id(self, usuario_id: int) -> Usuario | None:
         return self.session.get(Usuario, usuario_id)
@@ -38,6 +47,23 @@ class TorneioRepository:
         self.session.refresh(torneio)
         return torneio
     
+    def commit(self):
+        self.session.commit()
+        
+
+    def listar_partidas(self, rodada: Rodada):
+        stmt = (
+            select(Partida)
+            .where(Partida.rodada == rodada)
+        )
+        return self.session.scalars(stmt).all()
+    
+    def listar_rodadas(self, fase: Fase) -> list[Rodada]:
+        stmt = (
+            select(Rodada)
+            .where(Rodada.fase == fase)
+        )
+        return self.session.scalars(stmt).all()
 
     def adicionar_particiapacao_usuario(self, participacao: TorneioUsuario) -> TorneioUsuario:         
         self.session.add(participacao)
@@ -46,7 +72,7 @@ class TorneioRepository:
 
         return participacao
     
-    def listar_participantes(self, torneio_id: int) -> list[TorneioUsuario]:
+    def listar_participantes(self, torneio_id: int) -> list[Usuario]:
         stmt = (
             select(Usuario)
             .join(TorneioUsuario)
@@ -82,3 +108,13 @@ class TorneioRepository:
             )
 
         return self.session.scalars(stmt).all()
+    
+    def buscar_fase_por_tipo(self, torneio: Torneio, tipo_fase: TipoFase) -> Fase:
+        stmt = (
+            select(Fase)
+            .where(
+                Fase.torneio == torneio,
+                Fase.tipo == tipo_fase
+            )
+        )
+        return self.session.scalars(stmt).first()

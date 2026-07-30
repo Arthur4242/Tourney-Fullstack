@@ -1,7 +1,7 @@
 # from __future__ import annotations
 
-from models.base import Base
-from enums.enums_torneio import *
+from backend.src.models.base import Base
+from backend.src.enums.enums_torneio import *
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import Enum as SQLEnum
 from sqlalchemy import ForeignKey
@@ -10,8 +10,8 @@ from sqlalchemy import ForeignKey
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from models.usuario import Usuario
-    from models.rodada import Rodada
+    from backend.src.models.usuario import Usuario
+    from backend.src.models.rodada import Rodada
 
 class Partida(Base):
     __tablename__ = "partidas"

@@ -1,13 +1,13 @@
 # from __future__ import annotations
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import ForeignKey
-from models.base import Base
+from backend.src.models.base import Base
 
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from models.time import Time
-    from models.torneio import Torneio
+    from backend.src.models.time import Time
+    from backend.src.models.torneio import Torneio
 
 class TorneioTime(Base):
 

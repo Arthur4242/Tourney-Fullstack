@@ -1,16 +1,16 @@
 # from __future__ import annotations
 from typing import TYPE_CHECKING
 
-from models.base import Base
-from enums.enums_fase import *
+from backend.src.models.base import Base
+from backend.src.enums.enums_fase import *
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import Enum as SQLEnum
 from sqlalchemy import ForeignKey
 
 
 if TYPE_CHECKING:
-    from models.torneio import Torneio
-    from models.rodada import Rodada
+    from backend.src.models.torneio import Torneio
+    from backend.src.models.rodada import Rodada
     
 class Fase(Base):
     __tablename__ = "fases"
@@ -36,6 +36,5 @@ class Fase(Base):
 
     __mapper_args__ = {
         "polymorphic_on": tipo,
-        "polymorphic_identity": "fase"
     }
 

@@ -1,13 +1,13 @@
 # from __future__ import annotations
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from models.base import Base
+from backend.src.models.base import Base
 
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from models.usuario_time import UsuarioTime
-    from models.torneio_usuario import TorneioUsuario
+    from backend.src.models.usuario_time import UsuarioTime
+    from backend.src.models.torneio_usuario import TorneioUsuario
 
 class Usuario(Base):
     __tablename__ = "usuarios"

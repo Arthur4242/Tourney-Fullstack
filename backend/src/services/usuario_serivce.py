@@ -1,5 +1,5 @@
-from models.usuario import Usuario
-from repositories.usuario_repository import UsuarioRepository
+from backend.src.models.usuario import Usuario
+from backend.src.repositories.usuario_repository import UsuarioRepository
 import re
 
 class UsuarioService:
@@ -12,8 +12,8 @@ class UsuarioService:
         self.usuario_repository = usuario_repository
 
     def _validar_email(self, email):
-        if not email:
-            raise ValueError("O e-mail é obrigatório.")
+        # if not email:
+        #     raise ValueError("O e-mail é obrigatório.")
 
         if not self.EMAIL_REGEX.fullmatch(email):
             raise ValueError("E-mail inválido.")
@@ -23,10 +23,11 @@ class UsuarioService:
 
     def cadastrarUsuario(self, nome: str, email: str | None = None):
         
-        self._validar_email(email)
+        if email:
+            self._validar_email(email)
 
-        if self.usuario_repository.busar_usuario_por_email(email):
-            raise ValueError("Este email já possui um cadastro.")
+            if self.usuario_repository.busar_usuario_por_email(email):
+                raise ValueError("Este email já possui um cadastro.")
         
         usuario = Usuario(
             nome = nome,

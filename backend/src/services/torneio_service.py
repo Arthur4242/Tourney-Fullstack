@@ -1,14 +1,14 @@
-from models.usuario import Usuario
-from models.torneio import Torneio
-from models.torneio_usuario import TorneioUsuario
-from models.fase_mata_mata import FaseMataMata
-from models.rodada import Rodada
-from models.partida import Partida
-from models.fase import Fase
+from backend.src.models.usuario import Usuario
+from backend.src.models.torneio import Torneio
+from backend.src.models.torneio_usuario import TorneioUsuario
+from backend.src.models.fase_mata_mata import FaseMataMata
+from backend.src.models.rodada import Rodada
+from backend.src.models.partida import Partida
+from backend.src.models.fase import Fase
 
-from repositories.torneiro_repository import TorneioRepository
-from enums.enums_torneio import EstadoTorneio, TipoTorneio
-from enums.enums_fase import TipoFase
+from backend.src.repositories.torneiro_repository import TorneioRepository
+from backend.src.enums.enums_torneio import EstadoTorneio, TipoTorneio
+from backend.src.enums.enums_fase import TipoFase
 
 import random
 
@@ -19,7 +19,23 @@ class TorneioService:
 
     # CRUD
 
+    def buscar_torneio_por_nome(self, nome: str) -> Torneio:
+        torneio = self.torneio_repository.buscar_torneio_por_nome(nome)
+        if not torneio:
+            raise ValueError("Não há um torneio com este nome.")
+        return torneio
+
+    def buscar_fase_por_tipo(self, torneio: Torneio, tipo_fase: TipoFase) -> Fase:
+        fase = self.torneio_repository.buscar_fase_por_tipo(torneio,tipo_fase)
+        if not fase:
+            raise ValueError("Não existe uma fase desse tipo neste torneio")
+        
+        return fase
+
     def cadastrar_torneio(self, nome: str, tipo: TipoTorneio):
+        if self.buscar_torneio_por_nome(nome):
+            raise ValueError("Já existe um torneio com este nome.")
+        
         torneio = Torneio(
             nome=nome,
             tipo=tipo,
@@ -68,6 +84,13 @@ class TorneioService:
         
         self.torneio_repository.remover_participacao_usuario(p)
 
+    def listar_participantes_torneio(self, torneio: Torneio) -> list[Usuario]:
+        l_usuario = self.torneio_repository.listar_participantes(torneio.id)
+
+        if not l_usuario:
+            return []
+
+        return l_usuario
 
     # Alterar etapa do torneio
 
@@ -82,24 +105,6 @@ class TorneioService:
             raise ValueError("As inscrições não foram abertas para encerrar.")
         
         self.alterar_estado(torneio, EstadoTorneio.INSCRICOES_ENCERRADAS)
-
-    
-    def adicionar_fase_mata_mata(self, torneio: Torneio, melhor_de: int) -> Torneio:
-
-        if melhor_de <= 0 or melhor_de % 2 == 0:
-            raise ValueError("Melhor de deve ser um número ímpar maior que zero.")
-        
-        fase = FaseMataMata(
-            tipo=TipoFase.MATA_MATA,
-            melhor_de=melhor_de
-        )
-
-        torneio.fases_torneio.append(fase)
-
-        
-        torneio = self.torneio_repository.salvar(torneio)
-
-        return torneio
 
 
     def inicar_torneio(self, torneio: Torneio):
@@ -122,18 +127,49 @@ class TorneioService:
     def finalizar_partida(self, partida: Partida, vencedor: Usuario):
 
         if vencedor is not partida.jogador1 or partida.jogador2:
-            print("Este usuário não faz parte desta partida")
+            raise ValueError("Este usuário não faz parte desta partida")
+        
+        if partida.vencedor:
+            raise ValueError("Esta partida já possui um vencedor")
 
         partida.vencedor = vencedor
+        self.torneio_repository.commit()
+
 
     def verificar_fim_da_rodada(self, rodada: Rodada) -> bool:
         return all(partida.vencedor is not None for partida in rodada.partidas)
     
+    def adicionar_fase_mata_mata(self, torneio: Torneio, melhor_de: int) -> Torneio:
+
+        if melhor_de <= 0 or melhor_de % 2 == 0:
+            raise ValueError("Variavel 'melhor_de' deve ser um número ímpar maior que zero.")
+        
+
+        fase = FaseMataMata(
+            melhor_de=melhor_de
+        )
+        
+        torneio.fases_torneio.append(fase)
+
+        
+        torneio = self.torneio_repository.salvar(torneio)
+
+        return torneio
+
+    def listar_partidas(self, rodada: Rodada) -> list[Partida]:
+        partidas = self.torneio_repository.listar_partidas(rodada)
+
+        if not partidas:
+            raise ValueError("Não há partidas nessa rodada.")
+        
+        return partidas
+        
+
     # Lógica de Torneio
 
     def iniciar_chaveamento(self, torneio: Torneio):
                 
-        if torneio.fases_torneio.len() == 0:
+        if len(torneio.fases_torneio) == 0:
             raise ValueError("As fases do torneio ainda não foram preenchidas")
 
         for fase in torneio.fases_torneio:
@@ -142,7 +178,10 @@ class TorneioService:
                 
                 case TipoFase.MATA_MATA:
                     
-                    participantes = list(torneio.usuarios_participantes)
+                    l_torenio_usuario = list(torneio.usuarios_participantes)
+
+                    participantes = [tu.usuario for tu in l_torenio_usuario]
+                    
                     random.shuffle(participantes)
 
                     rodada = Rodada()
@@ -170,7 +209,7 @@ class TorneioService:
 
                         rodada.partidas.append(partida)
 
-                    fase.append(rodada)
+                    fase.rodadas.append(rodada)
 
                 case TipoFase.SWISS:
                     # lógica de chaveamento para swiss
@@ -180,10 +219,25 @@ class TorneioService:
         self.torneio_repository.salvar(torneio)
         return torneio
 
+    def verificar_fim_de_rodada(self, rodada: Rodada) -> bool:
+        for partida in rodada.partidas:
+            if not partida.vencedor:
+                return False
+        return True
+
+    def listar_rodadas(self, fase: Fase) -> list[Rodada]:
+        rodadas = self.torneio_repository.listar_rodadas(fase)
+        if not rodadas:
+            raise ValueError("Ainda não há rodadas nesta fase.")
+        return rodadas
+    
     # Lógica de mata_mata
 
     def criar_proxima_rodada_mata_mata(self, rodada_atual: Rodada):
         
+        if not self.verificar_fim_da_rodada(rodada_atual):
+            raise ValueError("As partidas da rodada atual ainda não foram concluídas.")
+
         vencedores = [
             partida.vencedor
             for partida in rodada_atual.partidas
@@ -194,7 +248,7 @@ class TorneioService:
             # Corrigir futuramente
             # rodada_atual.fase.torneio. = vencedores[0]
             # torneio.estado = EstadoTorneio.FINALIZADO
-            return ("O torneio terminou e o campeão é" + vencedores[0].nome)
+            return ("O torneio terminou e o campeão é: " + vencedores[0].nome)
 
         nova_rodada = Rodada()
 
