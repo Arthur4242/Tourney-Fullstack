@@ -13,8 +13,8 @@ from backend.src.enums.enums_fase import TipoFase
 from backend.src.repositories.usuario_repository import UsuarioRepository
 from backend.src.repositories.torneiro_repository import TorneioRepository
 
-from service.usuario_serivce import UsuarioService
-from service.torneio_service import TorneioService
+from backend.src.services.usuario_serivce import UsuarioService
+from backend.src.services.torneio_service import TorneioService
 from backend.src.models.base import Base
 from sqlalchemy import select
 

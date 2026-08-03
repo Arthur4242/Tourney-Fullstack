@@ -7,6 +7,7 @@ from backend.src.models.partida import Partida
 from backend.src.models.fase import Fase
 
 from backend.src.repositories.torneiro_repository import TorneioRepository
+from backend.src.repositories.usuario_repository import UsuarioRepository
 from backend.src.enums.enums_torneio import EstadoTorneio, TipoTorneio
 from backend.src.enums.enums_fase import TipoFase
 
@@ -14,8 +15,10 @@ import random
 
 class TorneioService:
 
-    def __init__(self, torneio_repository: TorneioRepository):
+    def __init__(self, torneio_repository: TorneioRepository, usuario_repository: UsuarioRepository):
         self.torneio_repository = torneio_repository
+        self.usuario_repository = usuario_repository
+
 
     # CRUD
 
@@ -23,6 +26,12 @@ class TorneioService:
         torneio = self.torneio_repository.buscar_torneio_por_nome(nome)
         if not torneio:
             raise ValueError("Não há um torneio com este nome.")
+        return torneio
+
+    def buscar_torneio_por_id(self, torneio_id: int) -> Torneio:
+        torneio = self.torneio_repository.buscart_torneio_por_id(torneio_id)
+        if not torneio:
+            raise ValueError("Não há um torneio com este id.")
         return torneio
 
     def buscar_fase_por_tipo(self, torneio: Torneio, tipo_fase: TipoFase) -> Fase:
@@ -58,7 +67,19 @@ class TorneioService:
         
 
 
-    def adicionar_usuario_torneio(self, usuario: Usuario, torneio: Torneio):
+    def adicionar_usuario_torneio(self, usuario_id: int, torneio_id: int):
+
+        usuario = self.usuario_repository.busar_usuario_por_id(usuario_id)
+
+        if not usuario:
+            raise ValueError("Usuario não encontrado.") 
+
+        torneio = self.torneio_repository.buscart_torneio_por_id(torneio_id)
+
+        if not torneio:
+            raise ValueError("Torneio não encontrado.")
+
+
         if torneio.tipo != TipoTorneio.INDIVIDUAL:
             raise ValueError("Não é possível cadastrar um indivídio nesse torneio")
         
@@ -68,13 +89,11 @@ class TorneioService:
             )
 
         participacao = TorneioUsuario(
-            usuario_id = usuario.id,
-            torneio_id = torneio.id,
             usuario = usuario,
             torneio = torneio
         )
 
-        self.torneio_repository.adicionar_particiapacao_usuario(participacao)
+        return self.torneio_repository.adicionar_particiapacao_usuario(participacao)
 
     def remover_usuario_torneio(self, usuario: Usuario, torneio: Torneio):
         p: TorneioUsuario | None = self.torneio_repository.procurar_participacao(usuario, torneio)
@@ -124,8 +143,12 @@ class TorneioService:
     def listar_torneios(self) -> list[Torneio]:
         return self.torneio_repository.listar()
     
-    def finalizar_partida(self, partida: Partida, vencedor: Usuario):
+    def finalizar_partida(self, partida_id: int, vencedor_id: int) -> Partida:
 
+        partida = self.torneio_repository.buscar_partida_por_id(partida_id)
+
+        vencedor = self.usuario_repository.busar_usuario_por_id(vencedor_id)
+        
         if vencedor is not partida.jogador1 or partida.jogador2:
             raise ValueError("Este usuário não faz parte desta partida")
         
@@ -134,6 +157,7 @@ class TorneioService:
 
         partida.vencedor = vencedor
         self.torneio_repository.commit()
+        return partida
 
 
     def verificar_fim_da_rodada(self, rodada: Rodada) -> bool:

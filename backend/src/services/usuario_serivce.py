@@ -18,10 +18,10 @@ class UsuarioService:
         if not self.EMAIL_REGEX.fullmatch(email):
             raise ValueError("E-mail inválido.")
 
-    def listarUsuarios(self):
+    def listar_usuarios(self):
         return self.usuario_repository.listar()
 
-    def cadastrarUsuario(self, nome: str, email: str | None = None):
+    def cadastrar_usuario(self, nome: str, email: str | None = None):
         
         if email:
             self._validar_email(email)
@@ -36,7 +36,7 @@ class UsuarioService:
 
         return self.usuario_repository.adicionar_usuario(usuario)
     
-    def buscarUsuarioPorId(self, usuario_id: int):
+    def buscar_usuario_por_id(self, usuario_id: int):
         usuario = self.usuario_repository.busar_usuario_por_id(usuario_id)
         if usuario is None:
             raise ValueError("Usuario não encontrado.")
@@ -48,7 +48,7 @@ class UsuarioService:
             raise ValueError("Usuario não encontrado.")
         return usuario
     
-    def atualizarUsuario(self, id: int, nome: str | None = None, email: str | None = None):
+    def atualizar_usuario(self, id: int, nome: str | None = None, email: str | None = None):
         usuario = self.buscarUsuarioPorId(id)
 
         if nome:
@@ -58,7 +58,7 @@ class UsuarioService:
             usuario.email = email
         return self.usuario_repository.salvar(usuario)
 
-    def deletarUsuario(self, usuario):
+    def deletar_usuario(self, usuario):
         if usuario is None:
             raise ValueError("Usuario não encontrado")
         

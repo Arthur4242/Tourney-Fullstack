@@ -25,9 +25,11 @@ class TorneioRepository:
             .where(Torneio.nome == nome_torneio)
         )
         return self.session.scalars(stmt).first()
+
+    def buscar_partida_por_id(self, partida_id: int):
+        return self.session.get(Partida, partida_id)
+
     
-    def busar_usuario_por_id(self, usuario_id: int) -> Usuario | None:
-        return self.session.get(Usuario, usuario_id)
     
     def adicionar_torneio(self, torneio: Torneio) -> Torneio:
         self.session.add(torneio)

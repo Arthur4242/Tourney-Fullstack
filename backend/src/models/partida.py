@@ -22,11 +22,11 @@ class Partida(Base):
         ForeignKey("rodadas.id")
     )
 
-    user1_id: Mapped[int] = mapped_column(
+    jogador1_id: Mapped[int] = mapped_column(
         ForeignKey("usuarios.id")
     )
 
-    user2_id: Mapped[int] = mapped_column(
+    jogador2_id: Mapped[int] = mapped_column(
         ForeignKey("usuarios.id")
     )
 
@@ -40,11 +40,11 @@ class Partida(Base):
     )
 
     jogador1: Mapped["Usuario"] = relationship(
-        foreign_keys=[user1_id]
+        foreign_keys=[jogador1_id]
     )
 
     jogador2: Mapped["Usuario | None"] = relationship(
-        foreign_keys=[user2_id]
+        foreign_keys=[jogador2_id]
     )
 
     vencedor: Mapped["Usuario | None"] = relationship(
