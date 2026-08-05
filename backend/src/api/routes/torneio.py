@@ -2,14 +2,23 @@ from fastapi import APIRouter
 from fastapi import Depends
 
 
-from schemas.torneio import CriarTorneioRequest, TorneioResponse, InscreverUsuarioRequest, InscreverUsuarioResponse, FinalizarPartidaRequest, MensagemResponse
+from backend.src.api.schemas.torneio import(
+    CriarTorneioRequest,
+    TorneioResponse, 
+    InscreverUsuarioRequest,
+    InscreverUsuarioResponse,
+    FinalizarPartidaRequest, 
+    MensagemResponse,
+    FinalizarTorneioRequest,
+    CancelarTorneioRequest
+) 
 
 from backend.src.services.torneio_service import TorneioService
 
-from dependencies import get_torneio_service
+from backend.src.api.dependencies import get_torneio_service
 
 router = APIRouter(
-    prefix="torneios",
+    prefix="/torneios",
     tags=["Torneios"]
 )
 
@@ -26,10 +35,11 @@ def criar_torneio(
     return TorneioResponse(
         id=torneio.id,
         nome=torneio.nome,
-        tipo_torneio=torneio.tipo
+        tipo_torneio=torneio.tipo,
+        estado_torneio=torneio.estado
     )
 
-@router.post("/inscrever", response_model=InscreverUsuarioResponse)
+@router.post("/inscrever_usuario", response_model=InscreverUsuarioResponse)
 def inscrever_usuario(
     inscricao_request: InscreverUsuarioRequest,
     torneio_service: TorneioService = Depends(get_torneio_service)
@@ -56,9 +66,35 @@ def finalizar_partida(
         msg= "Partida finalizada com sucesso."
     )
 
+@router.post("/finalizar_torneio", response_model=MensagemResponse)
+def finalizar_torneio(
+    request: FinalizarTorneioRequest,
+    torneio_service: TorneioService = Depends(get_torneio_service)
+):
+    torneio_service.finalizar_torneio(request.torneio_id,request.vencedor_id)
+    return MensagemResponse(
+        msg="Torneio finalizado com sucesso."
+    )
+
+@router.post("/cancelar_torneio", response_model=MensagemResponse)
+def cancelar_torneio(
+    request: CancelarTorneioRequest,
+    torneio_service: TorneioService = Depends(get_torneio_service)
+):
+    torneio_service.cancelar_torneio(request.torneio_id)
+    return MensagemResponse(
+        msg="Torneio cancelado com sucesso."
+    )
+
 @router.get("/{id}")
 def get_torneio(
     torneio_service: TorneioService = Depends(get_torneio_service)
 ):
     torneio = torneio_service.buscar_torneio_por_id(id)
-    return
+
+    return TorneioResponse(
+        id=torneio.id,
+        nome=torneio.nome,
+        estado=torneio.estado
+    )
+

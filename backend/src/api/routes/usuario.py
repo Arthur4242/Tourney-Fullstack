@@ -1,11 +1,14 @@
 from fastapi import APIRouter
 from fastapi import Depends
 
-from backend.src.api.schemas.usuario import CriarUsuarioRequest, UsuarioResponse
+from backend.src.api.schemas.usuario import (
+    CriarUsuarioRequest,
+    UsuarioResponse
+)
 from backend.src.services.usuario_serivce import UsuarioService
 
 
-from dependencies import get_usuario_service
+from backend.src.api.dependencies import get_usuario_service
 
 router = APIRouter(
     prefix="/usuarios",

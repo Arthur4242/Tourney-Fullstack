@@ -29,7 +29,7 @@ class TorneioService:
         return torneio
 
     def buscar_torneio_por_id(self, torneio_id: int) -> Torneio:
-        torneio = self.torneio_repository.buscart_torneio_por_id(torneio_id)
+        torneio = self.torneio_repository.buscar_torneio_por_id(torneio_id)
         if not torneio:
             raise ValueError("Não há um torneio com este id.")
         return torneio
@@ -42,15 +42,16 @@ class TorneioService:
         return fase
 
     def cadastrar_torneio(self, nome: str, tipo: TipoTorneio):
-        if self.buscar_torneio_por_nome(nome):
+        try:
+            self.buscar_torneio_por_nome(nome)
             raise ValueError("Já existe um torneio com este nome.")
-        
-        torneio = Torneio(
-            nome=nome,
-            tipo=tipo,
-            estado=EstadoTorneio.CRIADO
-        )
-        return self.torneio_repository.adicionar_torneio(torneio)
+        except ValueError:
+            torneio = Torneio(
+                nome=nome,
+                tipo=tipo,
+                estado=EstadoTorneio.CRIADO
+            )
+            return self.torneio_repository.adicionar_torneio(torneio)
     
     def deletar_torneio(self, torneio: Torneio):
         self.torneio_repository.deletar_torneio(torneio)
@@ -74,7 +75,7 @@ class TorneioService:
         if not usuario:
             raise ValueError("Usuario não encontrado.") 
 
-        torneio = self.torneio_repository.buscart_torneio_por_id(torneio_id)
+        torneio = self.torneio_repository.buscar_torneio_por_id(torneio_id)
 
         if not torneio:
             raise ValueError("Torneio não encontrado.")
@@ -132,12 +133,17 @@ class TorneioService:
 
         self.alterar_estado(torneio, EstadoTorneio.EM_ANDAMENTO)
 
-    def finalizar_torneio(self, torneio: Torneio):
+    def finalizar_torneio(self, torneio_id: int, vencedor_id: int):
+        torneio = self.torneio_repository.buscar_torneio_por_id(torneio_id)
+        vencedor = self.usuario_repository.busar_usuario_por_id(vencedor_id)
         if torneio.estado != EstadoTorneio.EM_ANDAMENTO:
             raise ValueError("O torneio não está em andamento para finalizar.")
+        torneio.vencedor = vencedor
         self.alterar_estado(torneio, EstadoTorneio.FINALIZADO)
+        return torneio
 
-    def cancelar_torneio(self, torneio: Torneio):
+    def cancelar_torneio(self, torneio_id: int):
+        torneio = self.torneio_repository.buscar_torneio_por_id(torneio_id)
         self.alterar_estado(torneio, EstadoTorneio.CANCELADO)
 
     def listar_torneios(self) -> list[Torneio]:

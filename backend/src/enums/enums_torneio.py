@@ -1,14 +1,14 @@
 from enum import Enum
 
 
-class TipoTorneio(Enum):
+class TipoTorneio(str, Enum):
     INDIVIDUAL = "INDIVIDUAL"
     EQUIPE = "EQUIPE"
 
-class EstadoTorneio(Enum):
-    CRIADO = "Criado"
-    INSCRICOES_ABERTAS = "Inscrições Abertas"
-    INSCRICOES_ENCERRADAS = "Inscrições Encerradas"
-    EM_ANDAMENTO = "Em andamento"
-    FINALIZADO = "Finalizado"
-    CANCELADO = "Cancelado"
+class EstadoTorneio(str, Enum):
+    CRIADO = "CRIADO"
+    INSCRICOES_ABERTAS = "INSCRICOES_ABERTAS"
+    INSCRICOES_ENCERRADAS = "INSCRICOES_ENCERRADAS"
+    EM_ANDAMENTO = "EM_ANDAMENTO"
+    FINALIZADO = "FINALIZADO"
+    CANCELADO = "CANCELADO" 

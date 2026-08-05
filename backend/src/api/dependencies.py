@@ -32,7 +32,7 @@ def get_torneio_repository(
     return TorneioRepository(session)
 
 def get_torneio_service(
-        torneio_repository = Depends(get_usuario_repository),
+        torneio_repository = Depends(get_torneio_repository),
         user_repository = Depends(get_usuario_repository)
 ):
     return TorneioService(torneio_repository, user_repository)

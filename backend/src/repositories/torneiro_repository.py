@@ -16,7 +16,7 @@ class TorneioRepository:
     def listar(self) -> list[Torneio]:
         return self.session.query(Torneio).all()
     
-    def buscart_torneio_por_id(self, torneio_id: int) -> Torneio | None:
+    def buscar_torneio_por_id(self, torneio_id: int) -> Torneio | None:
         return self.session.get(Torneio, torneio_id)
     
     def buscar_torneio_por_nome(self, nome_torneio: str) -> Torneio | None:
@@ -34,7 +34,6 @@ class TorneioRepository:
     def adicionar_torneio(self, torneio: Torneio) -> Torneio:
         self.session.add(torneio)
         self.session.commit()
-        self.session.refresh(torneio)
 
         return torneio
     
