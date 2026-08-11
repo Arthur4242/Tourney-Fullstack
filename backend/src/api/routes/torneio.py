@@ -10,7 +10,8 @@ from backend.src.api.schemas.torneio import(
     FinalizarPartidaRequest, 
     MensagemResponse,
     FinalizarTorneioRequest,
-    CancelarTorneioRequest
+    TorneioIdRequest,
+    CadastrarFaseTorneio
 ) 
 
 from backend.src.services.torneio_service import TorneioService
@@ -78,7 +79,7 @@ def finalizar_torneio(
 
 @router.post("/cancelar_torneio", response_model=MensagemResponse)
 def cancelar_torneio(
-    request: CancelarTorneioRequest,
+    request: TorneioIdRequest,
     torneio_service: TorneioService = Depends(get_torneio_service)
 ):
     torneio_service.cancelar_torneio(request.torneio_id)
@@ -98,3 +99,46 @@ def get_torneio(
         estado=torneio.estado
     )
 
+@router.post("/abrir_inscricoes", response_model=MensagemResponse)
+def abrir_inscricoes(
+    request: TorneioIdRequest,
+    torneio_service: TorneioService = Depends(get_torneio_service)
+):
+    torneio_service.abrir_inscricoes(request.torneio_id)
+
+    return MensagemResponse(
+        msg="Inscricoes abertas com sucesso."
+    )
+
+@router.post("/encerrar_inscricoes", response_model=MensagemResponse)
+def encerrar_inscricoes(
+    request: TorneioIdRequest,
+    torneio_service: TorneioService = Depends(get_torneio_service)
+):
+    torneio_service.encerrar_inscricoes(request.torneio_id)
+
+    return MensagemResponse(
+        msg="Inscricoes encerradas com sucesso."
+    )
+
+@router.post("/iniciar_torneio", response_model=MensagemResponse)
+def iniciar_torneio(
+    request: TorneioIdRequest,
+    torneio_service: TorneioService = Depends(get_torneio_service)
+):
+    torneio_service.iniciar_torneio(request.torneio_id)
+
+    return MensagemResponse(
+        msg="Torneio inciado com sucesso."
+    )
+
+@router.post("/cadastrar_fase_torneio", response_model=MensagemResponse)
+def cadastrar_fase_torneio(
+    request: CadastrarFaseTorneio,
+    torneio_service: TorneioService = Depends(get_torneio_service)
+):
+    torneio_service.cadastrar_fase_torneio(request.torneio_id, request.tipo_fase)
+
+    return MensagemResponse(
+        msg="Fase cadastrada ao torneio com sucesso."
+    )

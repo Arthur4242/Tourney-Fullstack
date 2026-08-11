@@ -44,7 +44,7 @@ class TorneioService:
     def cadastrar_torneio(self, nome: str, tipo: TipoTorneio):
         try:
             self.buscar_torneio_por_nome(nome)
-            raise ValueError("Já existe um torneio com este nome.")
+            
         except ValueError:
             torneio = Torneio(
                 nome=nome,
@@ -52,7 +52,27 @@ class TorneioService:
                 estado=EstadoTorneio.CRIADO
             )
             return self.torneio_repository.adicionar_torneio(torneio)
-    
+
+        raise ValueError("Já existe um torneio com este nome.")
+
+    def cadastrar_fase_torneio(self, torneio_id: int, tipo_fase: TipoFase):
+
+        torneio = self.buscar_torneio_por_id(torneio_id)
+
+        # Por enquanto a aplicação não deixa cadastrar fases de tipo repetidas
+        for fase in torneio.fases_torneio:
+           if fase.tipo == tipo_fase:
+               raise ValueError("O torneio já possui uma fase desse tipo.")
+
+        fase = Fase()
+        fase.tipo = tipo_fase
+
+        # Adicionar fase ao torneio
+        torneio.fases_torneio.append(fase)
+        self.torneio_repository.commit()
+        
+        return torneio
+
     def deletar_torneio(self, torneio: Torneio):
         self.torneio_repository.deletar_torneio(torneio)
 
@@ -114,20 +134,24 @@ class TorneioService:
 
     # Alterar etapa do torneio
 
-    def abrir_inscricoes(self, torneio: Torneio):
+    def abrir_inscricoes(self, torneio_id: int):
+        torneio = self.buscar_torneio_por_id(torneio_id)
         if torneio.estado != EstadoTorneio.CRIADO:
             raise ValueError("Não é possível abrir as incrições.")
         
         self.alterar_estado(torneio, EstadoTorneio.INSCRICOES_ABERTAS)
+        return torneio
 
-    def encerrar_inscricoes(self, torneio: Torneio):
+    def encerrar_inscricoes(self, torneio_id: int):
+        torneio = self.buscar_torneio_por_id(torneio_id)
         if torneio.estado != EstadoTorneio.INSCRICOES_ABERTAS:
             raise ValueError("As inscrições não foram abertas para encerrar.")
         
         self.alterar_estado(torneio, EstadoTorneio.INSCRICOES_ENCERRADAS)
 
 
-    def inicar_torneio(self, torneio: Torneio):
+    def iniciar_torneio(self, torneio_id: int):
+        torneio = self.buscar_torneio_por_id(torneio_id)
         if torneio.estado != EstadoTorneio.INSCRICOES_ENCERRADAS:
             raise ValueError("Não é possível iniciar o torneio.")
 
